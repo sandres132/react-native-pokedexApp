@@ -1,9 +1,9 @@
 import { View, Text } from 'react-native';
 
-export const App = () => {
+export const PokemonScreen = () => {
     return (
         <View>
-            <Text>App</Text>
+            <Text>PokemonScreen</Text>
         </View>
     )
 }

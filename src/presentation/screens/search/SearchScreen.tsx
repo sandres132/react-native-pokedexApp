@@ -1,9 +1,9 @@
 import { View, Text } from 'react-native';
 
-export const App = () => {
+export const SearchScreen = () => {
     return (
         <View>
-            <Text>App</Text>
+            <Text>SearchScreen</Text>
         </View>
     )
 }
