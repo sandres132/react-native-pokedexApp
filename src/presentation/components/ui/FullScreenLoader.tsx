@@ -1,7 +1,11 @@
 import { View, Text } from 'react-native';
 import { ActivityIndicator, useTheme } from 'react-native-paper';
 
-export const FullScreenLoader = () => {
+interface Props {
+    color?: string;
+}
+
+export const FullScreenLoader = ( { color }:Props) => {
 
     const { colors } = useTheme();
 
@@ -10,7 +14,7 @@ export const FullScreenLoader = () => {
             flex: 1,
             justifyContent: 'center',
             alignItems: 'center',
-            backgroundColor: colors.background,
+            backgroundColor: color,
         }}>
 
             <ActivityIndicator size={ 50 } />
