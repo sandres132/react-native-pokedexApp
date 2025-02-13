@@ -3,7 +3,7 @@ import { FlatList, Image, Pressable, ScrollView, StyleSheet, View } from 'react-
 import { RootStackParams } from '../../navigator/StackNavigator';
 import { useQuery } from '@tanstack/react-query';
 import { getPokemonById } from '../../../actions/pokemons';
-import { Chip, Text } from 'react-native-paper';
+import { Chip, FAB, Text } from 'react-native-paper';
 import { FullScreenLoader } from '../../components/ui/FullScreenLoader';
 import { Formatter } from '../../../config/helpers/Formatter';
 import { FadeInImage } from '../../components/ui/FadeInImage';
@@ -15,7 +15,7 @@ interface Props extends StackScreenProps<RootStackParams, 'PokemonScreen'> { }
 
 export const PokemonScreen = ({ navigation, route }: Props) => {
 
-    const { isDark } = useContext( ThemeContext )
+    const { isDark, theme } = useContext( ThemeContext )
     const { pokemonId } = route.params;
     const { top } = useSafeAreaInsets();
 
@@ -165,31 +165,33 @@ export const PokemonScreen = ({ navigation, route }: Props) => {
                 )}
             />
 
-            <Pressable
+            <FAB
                 onPress={ () => onPress(-1) }
-                style={ ({ pressed }) => ([
+                style={[
                     styles.button,
                     {
-                        opacity: pressed ? 0.5 : 1,
                         left: 30,
+                        backgroundColor: theme.colors.primary
                     },
-                ])}
-            >
-                <Text style={{ fontSize: 25, color: 'white' }}>Prev</Text>
-            </Pressable>
-
-            <Pressable
+                ]}
+                color={ theme.dark ? 'black' : 'white' }
+                icon='arrow-back-outline'
+                mode='flat'
+            />
+            
+            <FAB
                 onPress={ () => onPress(1) }
-                style={ ({ pressed }) => ([
+                style={[
                     styles.button,
                     {
-                        opacity: pressed ? 0.5 : 1,
                         right: 30,
+                        backgroundColor: theme.colors.primary
                     },
-                ])}
-            >
-                <Text style={{ fontSize: 25, color: 'white' }}>Next</Text>
-            </Pressable>
+                ]}
+                color={ theme.dark ? 'black' : 'white' }
+                icon='arrow-forward-outline'
+                mode='flat'
+            />
 
             <View style={{ height: 100 }} />
         </ScrollView>
@@ -243,12 +245,12 @@ const styles = StyleSheet.create({
     button: {
         position: 'absolute',
         bottom: 15,
-        width: 100,
-        borderRadius: 10,
-        borderColor: 'white',
+        width: 70,
+        // borderRadius: 10,
+        // borderColor: 'white',
         // borderWidth: 1.5,
-        padding: 10,
+        // padding: 10,
         alignItems: "center",
-        backgroundColor: 'rgba(0,0,0,0.2)',
+        // backgroundColor: 'rgba(0,0,0,0.2)',
     },
 });

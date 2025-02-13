@@ -8,6 +8,7 @@ import {
  
 import { PaperProvider, adaptNavigationTheme, MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
 import { useColorScheme } from 'react-native';
+import IonIcon from 'react-native-vector-icons/Ionicons'
  
 const { LightTheme: PaperLightTheme, DarkTheme: PaperDarkTheme } = adaptNavigationTheme( {
   reactNavigationLight: NavigationDefaultTheme,
@@ -47,7 +48,7 @@ export const ThemeContextProvider = ({children}: PropsWithChildren) => {
   };
     
     return (
-        <PaperProvider theme={ CombinedTheme }>
+        <PaperProvider settings={{ icon: props => <IonIcon {...props} /> }} theme={ CombinedTheme } >
             <NavigationContainer theme={ CombinedTheme }>
                 <ThemeContext.Provider value={{
                     isDark,

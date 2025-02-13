@@ -1,18 +1,23 @@
 import { StyleSheet, View } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ActivityIndicator, Text } from 'react-native-paper';
+import { ActivityIndicator, FAB, Text, useTheme } from 'react-native-paper';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { StackScreenProps } from '@react-navigation/stack';
+import { RootStackParams } from '../../navigator/StackNavigator';
 
 import { PokeballBg } from '../../components/ui/PokeballBg';
 import { globalTheme } from '../../../config/theme/global-theme';
 import { PokemonCard } from '../../components/pokemons/PokemonCard';
 import { getPokemons } from '../../../actions/pokemons';
 
-export const HomeScreen = () => {
+interface Props extends StackScreenProps<RootStackParams, 'HomeScreen'>{}
+
+export const HomeScreen = ({navigation}: Props) => {
 
     const { top } = useSafeAreaInsets();
     const queryClient = useQueryClient();
+    const theme = useTheme();
 
     // Esta es la forma tradicional de una peticion http con tanstackquery
     // const { isLoading, data: pokemons = [] } = useQuery({
@@ -61,12 +66,23 @@ export const HomeScreen = () => {
                     </View>
                 )}
             />
-            {isLoading && (
-                <ActivityIndicator
-                    style={{position: 'absolute'}}
-                    color="grey"
-                    size={30}
-                />
+
+            <FAB
+                label='Search'
+                style={[ globalTheme.fab, { backgroundColor: theme.colors.primary } ]}
+                mode='elevated'
+                icon='search-outline'
+                color={ theme.dark ? 'black' : 'white' }
+                onPress={() => navigation.push('SearchScreen')}
+            />
+
+            {
+                isLoading && (
+                    <ActivityIndicator
+                        style={{position: 'absolute'}}
+                        color="grey"
+                        size={30}
+                    />
             )}
         </View>
     )
