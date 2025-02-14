@@ -16,8 +16,8 @@ interface Props extends StackScreenProps<RootStackParams, 'HomeScreen'>{}
 export const HomeScreen = ({navigation}: Props) => {
 
     const { top } = useSafeAreaInsets();
-    const queryClient = useQueryClient();
     const theme = useTheme();
+    const queryClient = useQueryClient();
 
     // Esta es la forma tradicional de una peticion http con tanstackquery
     // const { isLoading, data: pokemons = [] } = useQuery({
@@ -75,15 +75,6 @@ export const HomeScreen = ({navigation}: Props) => {
                 color={ theme.dark ? 'black' : 'white' }
                 onPress={() => navigation.push('SearchScreen')}
             />
-
-            {
-                isLoading && (
-                    <ActivityIndicator
-                        style={{position: 'absolute'}}
-                        color="grey"
-                        size={30}
-                    />
-            )}
         </View>
     )
 }

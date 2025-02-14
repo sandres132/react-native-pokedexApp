@@ -1,5 +1,5 @@
 import { StackScreenProps } from '@react-navigation/stack';
-import { FlatList, Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList, Image, ScrollView, StyleSheet, View } from 'react-native';
 import { RootStackParams } from '../../navigator/StackNavigator';
 import { useQuery } from '@tanstack/react-query';
 import { getPokemonById } from '../../../actions/pokemons';
@@ -8,8 +8,10 @@ import { FullScreenLoader } from '../../components/ui/FullScreenLoader';
 import { Formatter } from '../../../config/helpers/Formatter';
 import { FadeInImage } from '../../components/ui/FadeInImage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 import { ThemeContext } from '../../context/ThemeContext';
+import { getPokemonMovesByIds } from '../../../actions/pokemons/get-pokemonMoves-by-ids';
+import { PokemonMoveCard } from '../../components/pokemons/PokemonMoveCard';
 
 interface Props extends StackScreenProps<RootStackParams, 'PokemonScreen'> { }
 
@@ -32,6 +34,12 @@ export const PokemonScreen = ({ navigation, route }: Props) => {
     if (!pokemon) {
         return (<FullScreenLoader />)
     }
+    
+    const { isLoading: isLoadingMoves, data: moves = [] } = useQuery({
+        queryKey: ['pokemons', 'by', pokemon.moves ],
+        queryFn: () => getPokemonMovesByIds( pokemon.moves ),
+        staleTime: 1000 * 60 * 60, // 60 minutos
+    });
 
     const onPress = (value: number) => {
         if( pokemonId + value === 0 ) return;
@@ -39,131 +47,134 @@ export const PokemonScreen = ({ navigation, route }: Props) => {
     }
 
     return (
-        <ScrollView
-            style={{ flex: 1, backgroundColor: pokemon.color }}
-            bounces={false}
-            showsVerticalScrollIndicator={false}>
-            {/* Header Container */}
-            <View style={styles.headerContainer}>
-                {/* Nombre del Pokemon */}
-                <Text
+        <>
+            <ScrollView
+                style={{ flex: 1, backgroundColor: pokemon.color }}
+                bounces={false}
+                showsVerticalScrollIndicator={false}
+            >
+
+                {/* Header Container */}
+                <View style={styles.headerContainer}>
+                    {/* Nombre del Pokemon */}
+                    <Text
+                        style={{
+                            ...styles.pokemonName,
+                            top: top + 5,
+                        }}>
+                        {Formatter.capitalize(pokemon.name) + '\n'}#{pokemon.id}
+                    </Text>
+
+                    {/* Pokeball */}
+                    <Image source={pokeballImg} style={styles.pokeball} />
+
+                    <FadeInImage uri={pokemon.avatar} style={styles.pokemonImage} />
+                </View>
+
+                {/* Types */}
+                <Text style={[ styles.subTitle, { color:  isDark ? 'white' : 'black' } ]}>Pokémon Types</Text>
+                <View
+                    style={{ flexDirection: 'row', marginHorizontal: 20, marginTop: 10 }}>
+                    {pokemon.types.map(type => (
+                        <Chip
+                            key={type}
+                            mode="outlined"
+                            selectedColor={ isDark ? 'white' : 'black'}
+                            style={{ marginLeft: 10 }}>
+                            {type}
+                        </Chip>
+                    ))}
+                </View>
+
+                {/* Weight and Height */}
+                <Text style={[ styles.subTitle, { color:  isDark ? 'white' : 'black' } ]}>General Information</Text>
+                <View style={[ styles.statsContainer, { flexDirection: 'row', marginTop: 10 } ]} >
+                    <Text variant='displaySmall' style={{ flex: 1, color: isDark ? 'white' : 'black'}} >
+                        {`Height: ${pokemon.height} ft`}
+                    </Text>
+                    <Text variant='displaySmall' style={{ flex: 1, color: isDark ? 'white' : 'black'}} >
+                        {`Weight: ${pokemon.weight} lbs`}
+                    </Text>
+                </View>
+
+                {/* Sprites */}
+                <Text style={[ styles.subTitle, { color:  isDark ? 'white' : 'black' } ]}>Pokémon Sprites</Text>
+                <FlatList
+                    data={pokemon.sprites}
+                    horizontal
+                    keyExtractor={item => item}
+                    showsHorizontalScrollIndicator={false}
+                    centerContent
                     style={{
-                        ...styles.pokemonName,
-                        top: top + 5,
-                    }}>
-                    {Formatter.capitalize(pokemon.name) + '\n'}#{pokemon.id}
-                </Text>
+                        marginTop: 5,
+                        height: 100,
+                    }}
+                    renderItem={({ item }) => (
+                        <FadeInImage
+                            uri={item}
+                            style={{ width: 100, height: 100, marginHorizontal: 5 }}
+                        />
+                    )}
+                />
 
-                {/* Pokeball */}
-                <Image source={pokeballImg} style={styles.pokeball} />
+                {/* abilities */}
+                <Text style={[ styles.subTitle, { color:  isDark ? 'white' : 'black' } ]}>Abilities</Text>
+                <FlatList
+                    data={pokemon.abilities}
+                    horizontal
+                    keyExtractor={item => item}
+                    showsHorizontalScrollIndicator={false}
+                    renderItem={({ item }) => (
+                        <Chip selectedColor={ isDark ? 'white' : 'black'} style={{marginRight: 10}} >{Formatter.capitalize(item)}</Chip>
+                    )}
+                    style={{paddingHorizontal: 20}}
+                />
 
-                <FadeInImage uri={pokemon.avatar} style={styles.pokemonImage} />
-            </View>
+                {/* stats */}
+                <Text style={[ styles.subTitle, { color:  isDark ? 'white' : 'black' } ]}>Stats</Text>
+                <FlatList
+                    data={pokemon.stats}
+                    horizontal
+                    keyExtractor={item => item.name}
+                    showsHorizontalScrollIndicator={false}
+                    renderItem={({ item }) => (
+                        <View style={ styles.statsContainer } >
+                            <Text style={{ flex: 1, color:  isDark ? 'white' : 'black' }} >
+                                {Formatter.capitalize(item.name)}
+                            </Text>
+                            <Text style={{ color:  isDark ? 'white' : 'black'}}>{ item.value }</Text>
+                        </View>
+                    )}
+                />
 
-            {/* Types */}
-            <View
-                style={{ flexDirection: 'row', marginHorizontal: 20, marginTop: 10 }}>
-                {pokemon.types.map(type => (
-                    <Chip
-                        key={type}
-                        mode="outlined"
-                        selectedColor={ isDark ? 'white' : 'black'}
-                        style={{ marginLeft: 10 }}>
-                        {type}
-                    </Chip>
-                ))}
-            </View>
+                {/* Games */}
+                <Text style={[ styles.subTitle, { color:  isDark ? 'white' : 'black' } ]}>Games</Text>
+                <FlatList
+                    data={pokemon.games}
+                    horizontal
+                    keyExtractor={item => item}
+                    showsHorizontalScrollIndicator={false}
+                    centerContent
+                    renderItem={({ item }) => (
+                        <View style={ styles.statsContainer } >
+                            <Chip selectedColor={ isDark ? 'white' : 'black'}>{ Formatter.capitalize(item)}</Chip>
+                        </View>
+                    )}
+                />
 
-            {/* Sprites */}
-            <FlatList
-                data={pokemon.sprites}
-                horizontal
-                keyExtractor={item => item}
-                showsHorizontalScrollIndicator={false}
-                centerContent
-                style={{
-                    marginTop: 20,
-                    height: 100,
-                }}
-                renderItem={({ item }) => (
-                    <FadeInImage
-                        uri={item}
-                        style={{ width: 100, height: 100, marginHorizontal: 5 }}
-                    />
-                )}
-            />
+                {/* Moves */}
+                <Text style={[ styles.subTitle, { color:  isDark ? 'white' : 'black', marginBottom: 10 } ]}>Moves</Text>
+                <FlatList
+                    data={moves}
+                    keyExtractor={ (item) => item.name}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    centerContent
+                    renderItem={({ item }) => <PokemonMoveCard move={ item } color={pokemon.color} />}
+                />
 
-            {/* Weight and Height */}
-            <View style={[ styles.statsContainer, { flexDirection: 'row' } ]} >
-                <Text variant='displaySmall' style={{ flex: 1, color: isDark ? 'white' : 'black' }} >
-                    {`Height: ${pokemon.height} ft`}
-                </Text>
-                <Text variant='displaySmall' style={{ flex: 1, color: isDark ? 'white' : 'black' }} >
-                    {`Weight: ${pokemon.weight} lbs`}
-                </Text>
-            </View>
-
-            {/* abilities */}
-            <Text style={[ styles.subTitle, { color:  isDark ? 'white' : 'black' } ]}>Abilities</Text>
-            <FlatList
-                data={pokemon.abilities}
-                horizontal
-                keyExtractor={item => item}
-                showsHorizontalScrollIndicator={false}
-                renderItem={({ item }) => (
-                    <Chip selectedColor={ isDark ? 'white' : 'black'} style={{marginRight: 10}} >{Formatter.capitalize(item)}</Chip>
-                )}
-                style={{paddingHorizontal: 20}}
-            />
-
-            {/* stats */}
-            <Text style={[ styles.subTitle, { color:  isDark ? 'white' : 'black' } ]}>Stats</Text>
-            <FlatList
-                data={pokemon.stats}
-                horizontal
-                keyExtractor={item => item.name}
-                showsHorizontalScrollIndicator={false}
-                renderItem={({ item }) => (
-                    <View style={ styles.statsContainer } >
-                        <Text style={{ flex: 1, color:  isDark ? 'white' : 'black' }} >
-                            {Formatter.capitalize(item.name)}
-                        </Text>
-                        <Text style={{ color:  isDark ? 'white' : 'black'}}>{ item.value }</Text>
-                    </View>
-                )}
-            />
-
-            {/* Moves */}
-            <Text style={[ styles.subTitle, { color:  isDark ? 'white' : 'black' } ]}>Moves</Text>
-            <FlatList
-                data={pokemon.moves}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                centerContent
-                renderItem={({ item }) => (
-                    <View style={ styles.statsContainer } >
-                        <Text style={{ flex: 1, color:  isDark ? 'white' : 'black' }} >
-                            {Formatter.capitalize(item.name)}
-                        </Text>
-                        <Text style={{ color:  isDark ? 'white' : 'black'}}>lvl { item.level }</Text>
-                    </View>
-                )}
-            />
-
-            {/* Games */}
-            <Text style={[ styles.subTitle, { color:  isDark ? 'white' : 'black' } ]}>Games</Text>
-            <FlatList
-                data={pokemon.games}
-                horizontal
-                keyExtractor={item => item}
-                showsHorizontalScrollIndicator={false}
-                centerContent
-                renderItem={({ item }) => (
-                    <View style={ styles.statsContainer } >
-                        <Chip selectedColor={ isDark ? 'white' : 'black'}>{ Formatter.capitalize(item)}</Chip>
-                    </View>
-                )}
-            />
+                <View style={{ height: 100 }} />
+            </ScrollView>
 
             <FAB
                 onPress={ () => onPress(-1) }
@@ -192,9 +203,7 @@ export const PokemonScreen = ({ navigation, route }: Props) => {
                 icon='arrow-forward-outline'
                 mode='flat'
             />
-
-            <View style={{ height: 100 }} />
-        </ScrollView>
+        </>
     )
 }
 
@@ -253,4 +262,45 @@ const styles = StyleSheet.create({
         alignItems: "center",
         // backgroundColor: 'rgba(0,0,0,0.2)',
     },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 35,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    buttonModal: {
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+    },
+    buttonOpen: {
+        backgroundColor: '#F194FF',
+    },
+    buttonClose: {
+        backgroundColor: '#2196F3',
+    },
+    textStyle: {
+        color: 'white',
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: 'center',
+    },
+    
 });

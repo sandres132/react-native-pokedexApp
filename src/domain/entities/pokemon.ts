@@ -24,4 +24,21 @@ export interface Stat {
 export interface Move {
     name: string;
     level: number;
+    url: string;
+}
+
+export interface PokeMove {
+    name: string;
+    accuracy: number;
+    power: number;
+    pp: number;
+    target: string;
+    damageClass: string;
+    description: EffectEntry[];
+    level: number;
+}
+
+export interface EffectEntry {
+    desc: string;
+    shortDesc: string;
 }

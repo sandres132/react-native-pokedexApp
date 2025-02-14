@@ -25,7 +25,7 @@ export class PokemonMapper {
               value: stat.base_stat,
             })),
             moves: data.moves
-              .map( move => ({ name: move.move.name, level: move.version_group_details[0].level_learned_at }))
+              .map( move => ({ name: move.move.name, level: move.version_group_details[0].level_learned_at, url: move.move.url }))
               .sort( ( a, b ) => a.level - b.level ),
             height: data.height,
             weight: data.weight,

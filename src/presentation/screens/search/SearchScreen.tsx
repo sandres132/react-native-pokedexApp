@@ -1,4 +1,4 @@
-import { FlatList, Platform, View } from 'react-native';
+import { FlatList, Platform, StyleSheet, View } from 'react-native';
 import { globalTheme } from '../../../config/theme/global-theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActivityIndicator, Text, TextInput } from 'react-native-paper';
@@ -8,10 +8,11 @@ import { getPokemonNamesWithId, getPokemonsByIds } from '../../../actions/pokemo
 import { useMemo, useState } from 'react';
 import { FullScreenLoader } from '../../components/ui/FullScreenLoader';
 import { useDebounceValue } from '../../hooks/useDebounceValue';
+import { PokeballBg } from '../../components/ui/PokeballBg';
 
 export const SearchScreen = () => {
 
-    const { top } = useSafeAreaInsets();
+    const { top, bottom } = useSafeAreaInsets();
     const [term, setTerm] = useState('');
 
     const debounceValue = useDebounceValue(term);
@@ -21,7 +22,7 @@ export const SearchScreen = () => {
         queryFn: () => getPokemonNamesWithId()
     });
 
-    // todo: aplicar debounce
+    // aplicar el debounce
     const pokemonNameIdList = useMemo( () => {
         // condicion para verificar si es un numero
         if( !isNaN(Number(debounceValue)) ) {
@@ -53,6 +54,8 @@ export const SearchScreen = () => {
 
     return (
         <View style={[ globalTheme.globalMargin, { paddingTop: top + 10 } ]}>
+            <PokeballBg style={[ styles.imgPosition, { bottom: bottom } ]} />
+
             <TextInput
                 placeholder='Search Pokémon'
                 mode='flat'
@@ -78,3 +81,11 @@ export const SearchScreen = () => {
         </View>
     )
 }
+
+
+const styles = StyleSheet.create({
+    imgPosition: {
+        position: 'absolute',
+        left: -70,
+    },
+})
